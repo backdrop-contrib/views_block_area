@@ -1,1 +1,6 @@
 name = Views block area
+description = Exposes all blocks as a views area.
+dependencies[] = views
+core = 7.x
+version = VERSION
+files[] = views/handlers/views_handler_area_block.inc

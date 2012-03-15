@@ -54,7 +54,7 @@ class views_handler_area_block extends views_handler_area {
       '#type' => 'textfield',
       '#title' => t('Block title'),
       '#default_value' => $this->options['title'],
-      '#description' => t('Override the title for the block. Use <none> to display no title, or leave blank to use the block title from block settings.'),
+      '#description' => t('Override the title for the block. Use &lt;none&gt; to display no title, or leave blank to use the block title from block settings.'),
     );
 
   }

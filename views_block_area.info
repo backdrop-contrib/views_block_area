@@ -1,5 +1,6 @@
 name = Views block area
 description = Exposes all blocks as a views area.
+dependencies[] = block
 dependencies[] = views
 package = Views
 core = 7.x

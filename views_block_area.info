@@ -6,3 +6,4 @@ package = Views
 core = 7.x
 version = VERSION
 files[] = views/handlers/views_handler_area_block.inc
+files[] = views/handlers/views_handler_field_block.inc

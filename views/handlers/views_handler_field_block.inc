@@ -25,19 +25,11 @@ class views_handler_field_block extends views_handler_field {
   function options_form(&$form, &$form_state) {
 
     parent::options_form($form, $form_state);
-
-    $query = db_select('block', 'b');
-    $query->leftJoin('block_custom', 'c', 'b.delta = c.bid AND b.module = :module', array(':module' => 'block'));
-    $result = $query
-      ->fields('b')
-      ->fields('c', array('info'))
-      ->orderBy('b.module')
-      ->condition('b.module', 'views', '!=')
-      ->addTag('block_load')
-      ->addTag('translatable')
-      ->execute();
-
-    $block_info = $result->fetchAllAssoc('bid');
+    $config_names = config_get_names_with_prefix('block');
+    $block_info = [];
+    foreach ($config_names as $config_name) {
+      $block_info[] = config_get($config_name);
+    }
     // Allow modules to modify the block list.
     drupal_alter('block_list', $block_info);
 

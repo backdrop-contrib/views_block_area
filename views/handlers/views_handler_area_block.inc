@@ -26,8 +26,11 @@ class views_handler_area_block extends views_handler_area {
 
     // Get a full list of blocks
     module_load_include('inc', 'block', 'block.admin');
-    global $theme_key;
-    $block_info = block_admin_display_prepare_blocks($theme_key);
+    $config_names = config_get_names_with_prefix('block');
+    $block_info = [];
+    foreach ($config_names as $config_name) {
+      $block_info[] = config_get($config_name);
+    }
 
     // Convert the list into a dropdown box, keyed by module & delta.
     $options = array();

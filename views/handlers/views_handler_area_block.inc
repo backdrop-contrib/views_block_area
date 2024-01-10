@@ -23,19 +23,22 @@ class views_handler_area_block extends views_handler_area {
   function options_form(&$form, &$form_state) {
 
     parent::options_form($form, $form_state);
-
-    // Get a full list of blocks
-    module_load_include('inc', 'block', 'block.admin');
+    //this will only get custom blocks, "system" blocks don't all share a config name in Backdrop
     $config_names = config_get_names_with_prefix('block');
     $block_info = [];
     foreach ($config_names as $config_name) {
       $block_info[] = config_get($config_name);
     }
+    // Allow modules to modify the block list.
+    drupal_alter('block_list', $block_info);
 
-    // Convert the list into a dropdown box, keyed by module & delta.
-    $options = array();
+    $options = [];
     foreach ($block_info as $block) {
-      $options[$block['module'] . ':' . $block['delta']] = $block['info'];
+      $options["{$block['delta']}"] = t('@delta@title', [
+        '@delta' => $block['delta'],
+        '@title' => (!empty($block['info'])) ? ' (' . $block['info'] .')' :
+           (($block['title'] == '<none>' || $block['title'] == '') ? '' : ' (' . $block['title'] . ')'),
+      ]);
     }
 
     $form['block_to_insert'] = array(
@@ -52,35 +55,29 @@ class views_handler_area_block extends views_handler_area {
       '#default_value' => $this->options['title'],
       '#description' => t('Override the title for the block. Use &lt;none&gt; to display no title, or leave blank to use the block title from block settings.'),
     );
-
   }
 
   /**
    * Render the area
    */
-  function render($empty = FALSE) {
+  function render($values = false) {
 
-    if ((!$empty || !empty($this->options['empty'])) && !empty($this->options['block_to_insert'])) {
+    if (!empty($this->options['block_to_insert'])) {
 
-      list ($module, $delta) = explode(':', $this->options['block_to_insert'], 2);
-      $block = block_load($module, $delta);
+      $block = block_custom_block_load($this->options['block_to_insert']);
       if (empty($block)) {
         return;
       }
-
+      $render_array = module_invoke('block', 'block_view', $block['delta']);
       if (!empty($this->options['title'])) {
-        $block->title = $this->options['title'];
+        $render_array['subject'] = $this->options['title'];
       }
 
-      $block_content = _block_render_blocks(array($block));
-
-      $build = _block_get_renderable_array($block_content);
-      return drupal_render($build);
+      return render($render_array['subject']) . render($render_array['content']);
 
     }
 
     return '';
-
   }
 
 }

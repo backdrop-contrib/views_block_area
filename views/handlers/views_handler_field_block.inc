@@ -25,6 +25,7 @@ class views_handler_field_block extends views_handler_field {
   function options_form(&$form, &$form_state) {
 
     parent::options_form($form, $form_state);
+    //this will only get custom blocks, "system" blocks don't all share a config name in Backdrop
     $config_names = config_get_names_with_prefix('block');
     $block_info = [];
     foreach ($config_names as $config_name) {
@@ -33,14 +34,13 @@ class views_handler_field_block extends views_handler_field {
     // Allow modules to modify the block list.
     drupal_alter('block_list', $block_info);
 
-    $options = array();
+    $options = [];
     foreach ($block_info as $block) {
-      $options["{$block->module}:{$block->delta}"] = t('@module:@delta@title', array(
-        '@module' => $block->module,
-        '@delta' => $block->delta,
-        '@title' => (!empty($block->info)) ? ' (' . $block->info .')' :
-           (($block->title == '<none>' || $block->title == '') ? '' : ' (' . $block->title . ')'),
-      ));
+      $options["{$block['delta']}"] = t('@delta@title', [
+        '@delta' => $block['delta'],
+        '@title' => (!empty($block['info'])) ? ' (' . $block['info'] .')' :
+           (($block['title'] == '<none>' || $block['title'] == '') ? '' : ' (' . $block['title'] . ')'),
+      ]);
     }
 
     $form['block_to_insert'] = array(
@@ -66,20 +66,16 @@ class views_handler_field_block extends views_handler_field {
 
     if (!empty($this->options['block_to_insert'])) {
 
-      list ($module, $delta) = explode(':', $this->options['block_to_insert'], 2);
-      $block = block_load($module, $delta);
+      $block = block_custom_block_load($this->options['block_to_insert']);
       if (empty($block)) {
         return;
       }
-
+      $render_array = module_invoke('block', 'block_view', $block['delta']);
       if (!empty($this->options['title'])) {
-        $block->title = $this->options['title'];
+        $render_array['subject'] = $this->options['title'];
       }
 
-      $block_content = _block_render_blocks(array($block));
-
-      $build = _block_get_renderable_array($block_content);
-      return drupal_render($build);
+      return render($render_array['subject']) . render($render_array['content']);
 
     }
 

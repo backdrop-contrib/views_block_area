@@ -64,7 +64,7 @@ class views_handler_area_block extends views_handler_area {
   /**
    * Render the area
    */
-  function render($values) {
+  function render($empty = false) {
 
     if (!empty($this->options['block_to_insert'])) {
       list($module, $delta) = explode('.', $this->options['block_to_insert']);

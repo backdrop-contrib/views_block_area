@@ -1,7 +1,8 @@
 type = module
 name = Views block area
 description = Exposes all blocks as a views area.
-dependencies[] = block
-dependencies[] = views
 package = Views
 backdrop = 1.x
+
+dependencies[] = block
+dependencies[] = views

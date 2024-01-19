@@ -32,3 +32,74 @@ function views_block_area_views_api() {
   );
 
 }
+
+/**
+ * Helper to create a pretty block object from a moddelta.
+ */
+function views_block_area_get_block($module, $delta, $info = NULL) {
+  if (!$info) {
+    $infos = module_invoke($module, 'block_info');
+    $info = @$infos[$delta];
+  }
+
+  if ($info) {
+    $info = compact('module', 'delta') + $info;
+    $info['info'] = trim($info['info']);
+
+    return (object) $info;
+  }
+}
+
+/**
+ *
+ */
+function views_block_area_get_renderable_array($block) {
+
+  $plugin_name = $block->module . ':' . $block->delta;
+  $data = array();
+
+  // Load Block entity.
+  if (!isset($block->class)) {
+    $block = new BlockLegacy($plugin_name, $data);
+  }
+  else {
+    $block = new $block->class($plugin_name, $data);
+
+  }
+
+  // Prepare block.
+  $block->prepare();
+
+  // Get block content
+  // Copied from layout_renderer_standard.inc.
+  $content = $block->getContent();
+
+  if (is_string($content)) {
+    $content = array(
+      '#markup' => $content,
+    );
+  }
+
+  $data = array(
+    'title' => $block->getTitle(),
+    'content' => $content,
+  );
+
+  // Allow altering of the title and content by other modules.
+  backdrop_alter(array(
+    'block_view',
+    'block_view_' . $block->module . '_' . str_replace('-', '_', $block->delta),
+  ), $data, $block);
+
+  // Assemble a structured content array.
+  $content = (object) array(
+    'title' => $data['title'],
+    'content' => $data['content'],
+  );
+
+  return array(
+    '#theme' => 'block',
+    '#content' => $content,
+    '#block' => $block,
+  );
+}

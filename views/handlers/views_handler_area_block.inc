@@ -23,21 +23,25 @@ class views_handler_area_block extends views_handler_area {
   function options_form(&$form, &$form_state) {
 
     parent::options_form($form, $form_state);
-    //this will only get custom blocks, "system" blocks don't all share a config name in Backdrop
-    $config_names = config_get_names_with_prefix('block');
-    $block_info = [];
-    foreach ($config_names as $config_name) {
-      $block_info[] = config_get($config_name);
+    $test = config_get('comment.recent.info');
+    $all_block_infos = [];
+    foreach (module_implements('block_info') as $module) {
+      if ($blocks = module_invoke($module, 'block_info')) {
+        foreach ($blocks as $delta => $info) {
+          $moddelta = $module . ':' . $delta;
+          $all_block_infos[$moddelta] = views_block_area_get_block($module, $delta, $info);
+        }
+      }
     }
     // Allow modules to modify the block list.
-    drupal_alter('block_list', $block_info);
+    drupal_alter('block_list', $all_block_infos);
 
     $options = [];
-    foreach ($block_info as $block) {
-      $options["{$block['delta']}"] = t('@delta@title', [
-        '@delta' => $block['delta'],
-        '@title' => (!empty($block['info'])) ? ' (' . $block['info'] .')' :
-           (($block['title'] == '<none>' || $block['title'] == '') ? '' : ' (' . $block['title'] . ')'),
+    foreach ($all_block_infos as $block) {
+      $options["{$block->module}.{$block->delta}"] = t('@delta@title', [
+        '@delta' => $block->delta,
+        '@title' => (!empty($block->info)) ? ' (' . $block->info .')' :
+           (($block->title == '<none>' || $block->title == '') ? '' : ' (' . $block->title . ')'),
       ]);
     }
 
@@ -60,21 +64,20 @@ class views_handler_area_block extends views_handler_area {
   /**
    * Render the area
    */
-  function render($values = false) {
+  function render($values) {
 
     if (!empty($this->options['block_to_insert'])) {
-
-      $block = block_custom_block_load($this->options['block_to_insert']);
+      list($module, $delta) = explode('.', $this->options['block_to_insert']);
+      $block = views_block_area_get_block($module, $delta);
       if (empty($block)) {
         return;
       }
-      $render_array = module_invoke('block', 'block_view', $block['delta']);
+      $render_array = views_block_area_get_renderable_array($block);
       if (!empty($this->options['title'])) {
-        $render_array['subject'] = $this->options['title'];
+        $render_array['#content']->title = $this->options['title'];
       }
 
-      return render($render_array['subject']) . render($render_array['content']);
-
+      return render($render_array);
     }
 
     return '';

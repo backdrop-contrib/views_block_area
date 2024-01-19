@@ -34,7 +34,7 @@ class views_handler_area_block extends views_handler_area {
       }
     }
     // Allow modules to modify the block list.
-    drupal_alter('block_list', $all_block_infos);
+    backdrop_alter('block_list', $all_block_infos);
 
     $options = [];
     foreach ($all_block_infos as $block) {

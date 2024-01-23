@@ -25,7 +25,6 @@ class views_handler_field_block extends views_handler_field {
   function options_form(&$form, &$form_state) {
 
     parent::options_form($form, $form_state);
-    $test = config_get('comment.recent.info');
     $all_block_infos = [];
     foreach (module_implements('block_info') as $module) {
       if ($blocks = module_invoke($module, 'block_info')) {

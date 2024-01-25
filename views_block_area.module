@@ -8,6 +8,16 @@
  */
 
 /**
+  * Implements hook_autoload_info().
+  */
+function views_block_area_autoload_info() {
+  return [
+    'views_handler_field_block' => 'views/handlers/views_handler_field_block.inc',
+    'views_handler_area_block' => 'views/handlers/views_handler_area_block.inc',
+  ];
+}
+
+/**
  * Implements hook_views_api().
  */
 function views_block_area_views_api() {

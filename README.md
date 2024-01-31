@@ -36,6 +36,8 @@ Credits
 
 - Ported to Backdrop CMS by [Giant Rabbit](https://github.com/giant-rabbit).
 - Originally written for Drupal 7 by [Nils Destoop](https://git.drupalcode.org/zuuperman).
+- Maintained for Drupal by [Nils Destoop](https://git.drupalcode.org/zuuperman), [Peter Lieverdink](https://git.drupalcode.org/cafuego),
+[Leon Kessler](https://git.drupalcode.org/leonnk), and [Pavlo Radyvonik](https://git.drupalcode.org/pradyvonik)
 
 License
 -------
